@@ -1,7 +1,22 @@
 {
-  "dependencies": {
-    "next": "^13.1.6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  }
+    "name": "clone-tabnews",
+    "version": "1.0.0",
+    "description": "",
+    "license": "MIT",
+    "author": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "dev": "next dev",
+        "lint:check": "prettier --check .",
+        "lint:fix": "prettier --write ."
+    },
+    "dependencies": {
+        "next": "^13.1.6",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
+    "devDependencies": {
+        "prettier": "^3.5.3"
+    }
 }
