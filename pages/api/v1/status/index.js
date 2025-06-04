@@ -1,4 +1,4 @@
-import database from "../../../../infra/database.js";
+import database from "infra/database.js";
 
 export default async function handler(request, response) {
     const q = "SELECT 1 + 1 AS SUM;";
