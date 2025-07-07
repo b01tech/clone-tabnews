@@ -1,9 +1,10 @@
 import database from "infra/database.js";
+import orchestrator from "tests/orchestrator.js";
 
-beforeAll(cleanDatabase);
-async function cleanDatabase() {
+beforeAll(async () => {
+    await orchestrator.waitForAllServices();
     await database.query("DROP SCHEMA PUBLIC CASCADE; CREATE SCHEMA PUBLIC;");
-}
+});
 
 test("POST to api/v1/migrations deve retornar 200", async () => {
     const response1 = await fetch("http://localhost:3000/api/v1/migrations", {
@@ -11,7 +12,6 @@ test("POST to api/v1/migrations deve retornar 200", async () => {
     });
 
     const response1Body = await response1.json();
-    console.log(response1Body);
 
     expect(response1.status).toBe(201); //verifica
     expect(Array.isArray(response1Body)).toBe(true);
@@ -22,7 +22,6 @@ test("POST to api/v1/migrations deve retornar 200", async () => {
     });
 
     const response2Body = await response2.json();
-    console.log(response2Body);
 
     expect(response2.status).toBe(200);
     expect(Array.isArray(response2Body)).toBe(true);
