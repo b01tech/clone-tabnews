@@ -1,13 +1,12 @@
 import retry from "async-retry";
+import database from "infra/database.js";
 
 async function waitForAllServices() {
-    console.log("Aguardando serviços...");
     await waitForWebServer();
-    console.log("Serviços prontos!");
 
     async function waitForWebServer() {
         return retry(fetchStatusPage, {
-            retries: 30, // Reduzir tentativas
+            retries: 30,
             maxTimeout: 2000,
             onRetry: (err, attempt) => {
                 console.log(
@@ -24,7 +23,6 @@ async function waitForAllServices() {
                 if (response.status !== 200) {
                     throw new Error(`Status ${response.status}`);
                 }
-                console.log("Servidor respondendo corretamente!");
             } catch (error) {
                 console.log("Erro ao conectar com servidor:", error.message);
                 throw error;
@@ -33,8 +31,13 @@ async function waitForAllServices() {
     }
 }
 
+async function clearDatabase() {
+    await database.query("DROP SCHEMA PUBLIC CASCADE; CREATE SCHEMA PUBLIC;");
+}
+
 const orchestrator = {
     waitForAllServices,
+    clearDatabase,
 };
 
 export default orchestrator;
