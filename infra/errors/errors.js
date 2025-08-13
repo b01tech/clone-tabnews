@@ -56,3 +56,21 @@ export class MethodNotAllowedError extends Error {
         };
     }
 }
+export class ValidationError extends Error {
+    constructor({ action, message }) {
+        super(message || "Dados inválidos");
+        this.name = "ValidationError";
+        this.action =
+            action || "Verifique os dados fornecidos e tente novamente";
+        this.statusCode = 400;
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            action: this.action,
+            status_code: this.statusCode,
+        };
+    }
+}
