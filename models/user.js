@@ -1,5 +1,5 @@
 import database from "infra/database.js";
-import { ValidationError } from "infra/errors/errors.js";
+import { ValidationError, NotFoundError } from "infra/errors/errors.js";
 
 async function create(userInputValues) {
     await validateUserName(userInputValues.username);
@@ -60,8 +60,23 @@ async function create(userInputValues) {
     }
 }
 
+async function findByUsername(username) {
+    const result = await database.query({
+        text: `SELECT * FROM users WHERE LOWER(username) = LOWER($1) LIMIT 1`,
+        values: [username],
+    });
+    if (result.rows.length === 0) {
+        throw new NotFoundError({
+            message: "Usuário não encontrado",
+            action: "Utilize outro nome de usuário",
+        });
+    }
+    return result.rows[0];
+}
+
 const user = {
     create,
+    findByUsername,
 };
 
 export default user;
