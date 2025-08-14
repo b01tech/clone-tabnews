@@ -56,6 +56,7 @@ export class MethodNotAllowedError extends Error {
         };
     }
 }
+
 export class ValidationError extends Error {
     constructor({ action, message }) {
         super(message || "Dados inválidos");
@@ -63,6 +64,24 @@ export class ValidationError extends Error {
         this.action =
             action || "Verifique os dados fornecidos e tente novamente";
         this.statusCode = 400;
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            action: this.action,
+            status_code: this.statusCode,
+        };
+    }
+}
+export class NotFoundError extends Error {
+    constructor({ action, message }) {
+        super(message || "Dados não encontrados");
+        this.name = "NotFoundError";
+        this.action =
+            action || "Verifique os dados fornecidos e tente novamente";
+        this.statusCode = 404;
     }
 
     toJSON() {
