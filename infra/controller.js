@@ -12,10 +12,10 @@ async function onNoMatchHandler(request, response) {
 
 async function onErrorHandler(error, request, response) {
     if (error instanceof ValidationError) {
-        response.status(error.statusCode).json(error);
+        return response.status(error.statusCode).json(error);
     }
     if (error instanceof NotFoundError) {
-        response.status(error.statusCode).json(error);
+        return response.status(error.statusCode).json(error);
     }
 
     const publicObjectError = new InternalServerError({
