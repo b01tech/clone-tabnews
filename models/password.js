@@ -1,8 +1,12 @@
 import bcrypt from "bcryptjs";
 
 async function hash(inputPassword) {
-    const rounds = 10;
+    const rounds = getNumberOfRounds();
     return await bcrypt.hash(inputPassword, rounds);
+}
+
+function getNumberOfRounds() {
+    return process.env.NODE_ENV === "production" ? 12 : 1;
 }
 
 async function compare(inputPassword, hashedPassword) {
