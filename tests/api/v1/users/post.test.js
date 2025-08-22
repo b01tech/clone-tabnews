@@ -1,5 +1,7 @@
 import orchestrator from "tests/orchestrator.js";
 import { version as uuidVersion } from "uuid";
+import userModel from "models/user.js";
+import passwordModel from "models/password.js";
 
 beforeAll(async () => {
     await orchestrator.waitForAllServices();
@@ -27,13 +29,24 @@ describe("POST api/v1/users", () => {
             id: responseBody.id,
             username: "John Doe",
             email: "john.doe@example.com",
-            password: "XXXXXXXXXXX",
+            password: responseBody.password,
             created_at: responseBody.created_at,
             updated_at: responseBody.updated_at,
         });
         expect(uuidVersion(responseBody.id)).toBe(4);
         expect(Date.parse(responseBody.created_at)).not.toBeNaN();
         expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+        const userInDatabase = await userModel.findByUsername("John Doe");
+        const passwordIsCorrect = await passwordModel.compare(
+            "XXXXXXXXXXX",
+            userInDatabase.password,
+        );
+        expect(passwordIsCorrect).toBe(true);
+        const wrongPassword = await passwordModel.compare(
+            "wrongpassword",
+            userInDatabase.password,
+        );
+        expect(wrongPassword).toBe(false);
     });
 
     test("Create a user with email already registered should returns 400", async () => {
