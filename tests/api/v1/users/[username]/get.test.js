@@ -9,23 +9,16 @@ beforeAll(async () => {
 
 describe("GET api/v1/users/[username]", () => {
     test("Get a user should returns 200", async () => {
-        const response = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "JohnDoe",
-                email: "john.doe@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "JohnDoe",
+            email: "john.doe@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response.status).toBe(201);
-        const response2 = await fetch(
+        const response = await fetch(
             "http://localhost:3000/api/v1/users/JohnDoe",
         );
-        expect(response2.status).toBe(200);
-        const userData = await response2.json();
+        expect(response.status).toBe(200);
+        const userData = await response.json();
         expect(userData).toEqual({
             id: userData.id,
             username: "JohnDoe",
@@ -39,23 +32,16 @@ describe("GET api/v1/users/[username]", () => {
         expect(Date.parse(userData.updated_at)).not.toBeNaN();
     });
     test("Get a user with Case Sensitive mismatch should returns 200", async () => {
-        const response = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "JaneDoe",
-                email: "jane.doe@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "JaneDoe",
+            email: "jane.doe@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response.status).toBe(201);
-        const response2 = await fetch(
+        const response = await fetch(
             "http://localhost:3000/api/v1/users/janedoE",
         );
-        expect(response2.status).toBe(200);
-        const userData = await response2.json();
+        expect(response.status).toBe(200);
+        const userData = await response.json();
         expect(userData).toEqual({
             id: userData.id,
             username: "JaneDoe",

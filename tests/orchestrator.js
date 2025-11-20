@@ -1,6 +1,7 @@
 import retry from "async-retry";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
+import user from "models/user";
 
 async function waitForAllServices() {
     await waitForWebServer();
@@ -39,11 +40,15 @@ async function clearDatabase() {
 async function runningPendingMigrations() {
     await migrator.applyPendingMigrations();
 }
+async function createUser(userObject) {
+    await user.create(userObject);
+}
 
 const orchestrator = {
     waitForAllServices,
     clearDatabase,
     runningPendingMigrations,
+    createUser,
 };
 
 export default orchestrator;

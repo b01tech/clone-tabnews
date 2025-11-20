@@ -11,18 +11,11 @@ beforeAll(async () => {
 
 describe("PATCH api/v1/users/[username]", () => {
     test("Patch a registered user should returns 200", async () => {
-        const response = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "patchuser",
-                email: "patchuser@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "patchuser",
+            email: "patchuser@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response.status).toBe(201);
         const responsePatch = await fetch(
             "http://localhost:3000/api/v1/users/patchuser",
             {
@@ -78,30 +71,16 @@ describe("PATCH api/v1/users/[username]", () => {
         });
     });
     test("Patch a user with email already registered should returns 400", async () => {
-        const response1 = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "email1",
-                email: "email1@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "email1",
+            email: "email1@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response1.status).toBe(201);
-        const response2 = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "email2",
-                email: "email2@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "email2",
+            email: "email2@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response2.status).toBe(201);
         const response3 = await fetch(
             "http://localhost:3000/api/v1/users/email2",
             {
@@ -124,30 +103,16 @@ describe("PATCH api/v1/users/[username]", () => {
         });
     });
     test("Patch a user with username already registered should returns 400", async () => {
-        const response1 = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "user1",
-                email: "user1@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "user1",
+            email: "user1@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response1.status).toBe(201);
-        const response2 = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "user2",
-                email: "user2@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "user2",
+            email: "user2@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response2.status).toBe(201);
         const response3 = await fetch(
             "http://localhost:3000/api/v1/users/user2",
             {
@@ -170,18 +135,11 @@ describe("PATCH api/v1/users/[username]", () => {
         });
     });
     test("Patch a new password should returns 200", async () => {
-        const response1 = await fetch("http://localhost:3000/api/v1/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: "password1",
-                email: "password1@example.com",
-                password: "XXXXXXXXXXX",
-            }),
+        await orchestrator.createUser({
+            username: "password1",
+            email: "password1@example.com",
+            password: "XXXXXXXXXXX",
         });
-        expect(response1.status).toBe(201);
         const response2 = await fetch(
             "http://localhost:3000/api/v1/users/password1",
             {
