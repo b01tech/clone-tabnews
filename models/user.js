@@ -98,7 +98,6 @@ async function validateUserName(username) {
     }
 }
 async function validateEmail(email) {
-
     if (email == "") {
         throw new ValidationError({
             message: "Email é obrigatório",

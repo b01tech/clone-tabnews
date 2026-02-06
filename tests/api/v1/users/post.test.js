@@ -138,7 +138,7 @@ describe("POST api/v1/users", () => {
             status_code: 400,
         });
     });
-    test("Create a user with email empty should returns 400", async () =>{
+    test("Create a user with email empty should returns 400", async () => {
         const response = await fetch("http://localhost:3000/api/v1/users", {
             method: "POST",
             headers: {
@@ -158,7 +158,7 @@ describe("POST api/v1/users", () => {
             action: "Utilize outro email",
             status_code: 400,
         });
-    })
+    });
 
     test("Create a user with username with less than 3 characters should returns 400", async () => {
         const response = await fetch("http://localhost:3000/api/v1/users", {
@@ -202,5 +202,5 @@ describe("POST api/v1/users", () => {
             action: "Utilize outra senha",
             status_code: 400,
         });
-    })
+    });
 });
