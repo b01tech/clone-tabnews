@@ -71,6 +71,19 @@ async function findByUsername(username) {
     }
     return result.rows[0];
 }
+async function findByEmail(email) {
+    const result = await database.query({
+        text: `SELECT * FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1`,
+        values: [email],
+    });
+    if (result.rows.length === 0) {
+        throw new NotFoundError({
+            message: "Usuário não encontrado",
+            action: "Utilize outro email",
+        });
+    }
+    return result.rows[0];
+}
 
 async function validateUserName(username) {
     if (username == "") {
@@ -135,6 +148,7 @@ const user = {
     create,
     update,
     findByUsername,
+    findByEmail,
 };
 
 export default user;
