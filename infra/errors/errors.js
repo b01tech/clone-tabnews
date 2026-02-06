@@ -75,6 +75,7 @@ export class ValidationError extends Error {
         };
     }
 }
+
 export class NotFoundError extends Error {
     constructor({ action, message }) {
         super(message || "Dados não encontrados");
@@ -82,6 +83,24 @@ export class NotFoundError extends Error {
         this.action =
             action || "Verifique os dados fornecidos e tente novamente";
         this.statusCode = 404;
+    }
+
+    toJSON() {
+        return {
+            name: this.name,
+            message: this.message,
+            action: this.action,
+            status_code: this.statusCode,
+        };
+    }
+}
+
+export class UnauthorizedError extends Error {
+    constructor({ action, message }) {
+        super(message || "Acesso não autorizado");
+        this.name = "UnauthorizedError";
+        this.action = action || "Verifique suas credenciais e tente novamente";
+        this.statusCode = 401;
     }
 
     toJSON() {
