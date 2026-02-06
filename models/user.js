@@ -5,6 +5,7 @@ import { ValidationError, NotFoundError } from "infra/errors/errors.js";
 async function create(userInputValues) {
     await validateUserName(userInputValues.username);
     await validateEmail(userInputValues.email);
+    await validatePassword(userInputValues.password);
     await hashPasswordInObject(userInputValues);
     const newUser = await runInsertQuery(userInputValues);
     return newUser;
@@ -36,6 +37,7 @@ async function update(username, userInputValues) {
         await validateEmail(userInputValues.email);
     }
     if ("password" in userInputValues) {
+        await validatePassword(userInputValues.password);
         await hashPasswordInObject(userInputValues);
     }
     const userWithNewValues = { ...user, ...userInputValues };
@@ -96,6 +98,13 @@ async function validateUserName(username) {
     }
 }
 async function validateEmail(email) {
+
+    if (email == "") {
+        throw new ValidationError({
+            message: "Email é obrigatório",
+            action: "Utilize outro email",
+        });
+    }
     const result = await database.query({
         text: `SELECT email FROM users WHERE LOWER(email) = LOWER($1)`,
         values: [email],
@@ -104,6 +113,14 @@ async function validateEmail(email) {
         throw new ValidationError({
             message: "Email já cadastrado",
             action: "Utilize outro email",
+        });
+    }
+}
+async function validatePassword(password) {
+    if (password.length < 6) {
+        throw new ValidationError({
+            message: "Senha deve ter pelo menos 6 caracteres",
+            action: "Utilize outra senha",
         });
     }
 }
