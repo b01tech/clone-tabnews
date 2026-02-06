@@ -41,7 +41,12 @@ async function runningPendingMigrations() {
     await migrator.applyPendingMigrations();
 }
 async function createUser(userObject) {
-    await user.create(userObject);
+    var validUserData = {
+        username: userObject.username || "User Example",
+        email: userObject.email || "user@example.com",
+        password: userObject.password || "123456",
+    };
+    await user.create(validUserData);
 }
 
 const orchestrator = {
