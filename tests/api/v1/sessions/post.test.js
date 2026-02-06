@@ -1,5 +1,6 @@
 import orchestrator from "tests/orchestrator.js";
 import session from "models/session.js";
+import setCookieParser from "set-cookie-parser";
 
 beforeAll(async () => {
     await orchestrator.waitForAllServices();
@@ -48,6 +49,18 @@ describe("POST api/v1/sessions", () => {
         expect(
             session.EXPIRATION_IN_MILISECONDS - expirationTimeMilliseconds,
         ).toBeLessThan(1000);
+
+        // Check if cookie is set
+        const cookies = setCookieParser.parse(response);
+        expect(cookies).toHaveLength(1);
+        expect(cookies[0].name).toBe("session_id");
+        expect(cookies[0].value).toBe(responseBody.token);
+        expect(cookies[0].httpOnly).toBe(true);
+        expect(cookies[0].path).toBe("/");
+        expect(cookies[0].maxAge).toBe(
+            session.EXPIRATION_IN_MILISECONDS / 1000,
+        );
+        expect(cookies[0].sameSite).toBe("Strict");
     });
     test("should return 401 if email is incorrect", async () => {
         const response = await fetch("http://localhost:3000/api/v1/sessions", {
