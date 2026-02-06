@@ -138,6 +138,27 @@ describe("POST api/v1/users", () => {
             status_code: 400,
         });
     });
+    test("Create a user with email empty should returns 400", async () =>{
+        const response = await fetch("http://localhost:3000/api/v1/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username: "User",
+                email: "",
+                password: "XXXXXXXXXXX",
+            }),
+        });
+        const responseBody = await response.json();
+        expect(response.status).toBe(400);
+        expect(responseBody).toEqual({
+            name: "ValidationError",
+            message: "Email é obrigatório",
+            action: "Utilize outro email",
+            status_code: 400,
+        });
+    })
 
     test("Create a user with username with less than 3 characters should returns 400", async () => {
         const response = await fetch("http://localhost:3000/api/v1/users", {
@@ -160,4 +181,26 @@ describe("POST api/v1/users", () => {
             status_code: 400,
         });
     });
+
+    test("Create a user with password empty should returns 400", async () => {
+        const response = await fetch("http://localhost:3000/api/v1/users", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username: "User",
+                email: "user@example.com",
+                password: "",
+            }),
+        });
+        const responseBody = await response.json();
+        expect(response.status).toBe(400);
+        expect(responseBody).toEqual({
+            name: "ValidationError",
+            message: "Senha deve ter pelo menos 6 caracteres",
+            action: "Utilize outra senha",
+            status_code: 400,
+        });
+    })
 });
