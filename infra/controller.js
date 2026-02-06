@@ -3,6 +3,7 @@ import {
     MethodNotAllowedError,
     ValidationError,
     NotFoundError,
+    UnauthorizedError,
 } from "infra/errors/errors.js";
 
 async function onNoMatchHandler(request, response) {
@@ -15,6 +16,9 @@ async function onErrorHandler(error, request, response) {
         return response.status(error.statusCode).json(error);
     }
     if (error instanceof NotFoundError) {
+        return response.status(error.statusCode).json(error);
+    }
+    if (error instanceof UnauthorizedError) {
         return response.status(error.statusCode).json(error);
     }
 
