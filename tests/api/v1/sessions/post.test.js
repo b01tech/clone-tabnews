@@ -1,4 +1,5 @@
 import orchestrator from "tests/orchestrator.js";
+import session from "models/session.js";
 
 beforeAll(async () => {
     await orchestrator.waitForAllServices();
@@ -25,7 +26,28 @@ describe("POST api/v1/sessions", () => {
         });
         const responseBody = await response.json();
         expect(response.status).toBe(201);
-        expect(responseBody.message).toBe("Session created");
+        expect(responseBody).toEqual({
+            id: responseBody.id,
+            token: responseBody.token,
+            user_id: responseBody.user_id,
+            expires_at: responseBody.expires_at,
+            created_at: responseBody.created_at,
+            updated_at: responseBody.updated_at,
+        });
+        expect(Date.parse(responseBody.expires_at)).not.toBeNaN();
+        expect(Date.parse(responseBody.created_at)).not.toBeNaN();
+        expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+        expect(responseBody.token).toHaveLength(96);
+
+        const expiresAt = new Date(responseBody.expires_at);
+        const createdAt = new Date(responseBody.created_at);
+
+        const expirationTimeMilliseconds = expiresAt - createdAt;
+
+        // Check if expiration is close to the expected expiration time (within 1 second)
+        expect(
+            session.EXPIRATION_IN_MILISECONDS - expirationTimeMilliseconds,
+        ).toBeLessThan(1000);
     });
     test("should return 401 if email is incorrect", async () => {
         const response = await fetch("http://localhost:3000/api/v1/sessions", {
