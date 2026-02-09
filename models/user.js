@@ -84,6 +84,19 @@ async function findByEmail(email) {
     }
     return result.rows[0];
 }
+async function findById(id) {
+    const result = await database.query({
+        text: `SELECT * FROM users WHERE id = $1 LIMIT 1`,
+        values: [id],
+    });
+    if (result.rows.length === 0) {
+        throw new NotFoundError({
+            message: "Usuário não encontrado",
+            action: "Utilize outro id",
+        });
+    }
+    return result.rows[0];
+}
 
 async function validateUserName(username) {
     if (username == "") {
@@ -149,6 +162,7 @@ const user = {
     update,
     findByUsername,
     findByEmail,
+    findById,
 };
 
 export default user;

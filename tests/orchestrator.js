@@ -1,7 +1,8 @@
 import retry from "async-retry";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
-import user from "models/user";
+import user from "models/user.js";
+import session from "models/session.js";
 
 async function waitForAllServices() {
     await waitForWebServer();
@@ -46,7 +47,11 @@ async function createUser(userObject) {
         email: userObject.email || "user@example.com",
         password: userObject.password || "123456",
     };
-    await user.create(validUserData);
+    return await user.create(validUserData);
+}
+async function createSession(userId) {
+    const newSession = await session.create(userId);
+    return newSession;
 }
 
 const orchestrator = {
@@ -54,6 +59,7 @@ const orchestrator = {
     clearDatabase,
     runningPendingMigrations,
     createUser,
+    createSession,
 };
 
 export default orchestrator;
