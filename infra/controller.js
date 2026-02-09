@@ -21,6 +21,7 @@ async function onErrorHandler(error, request, response) {
         return response.status(error.statusCode).json(error);
     }
     if (error instanceof UnauthorizedError) {
+        await clearSessionCookie(response);
         return response.status(error.statusCode).json(error);
     }
 
@@ -42,6 +43,17 @@ async function setSessionCookie(token, response) {
 
     response.setHeader("Set-Cookie", [setCookie]);
 }
+async function clearSessionCookie(response) {
+    const clearCookie = cookie.serialize("session_id", "", {
+        httpOnly: true,
+        path: "/",
+        maxAge: -1,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "Strict",
+    });
+
+    response.setHeader("Set-Cookie", [clearCookie]);
+}
 
 const controller = {
     errorHandlers: {
@@ -49,6 +61,7 @@ const controller = {
         onError: onErrorHandler,
     },
     setSessionCookie,
+    clearSessionCookie,
 };
 
 export default controller;
