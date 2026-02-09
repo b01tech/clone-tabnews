@@ -1,5 +1,6 @@
-import session from "models/session.js";
 import orchestrator from "tests/orchestrator.js";
+import session from "models/session.js";
+import setCookieParser from "set-cookie-parser";
 
 beforeAll(async () => {
     await orchestrator.waitForAllServices();
@@ -28,6 +29,29 @@ describe("GET /api/v1/user", () => {
             created_at: createUser.created_at.toISOString(),
             updated_at: createUser.updated_at.toISOString(),
         });
+
+        // refresh session
+        const refreshedSession = await session.findByValidToken(
+            sessionObj.token,
+        );
+        expect(refreshedSession.expires_at.getTime()).toBeGreaterThan(
+            sessionObj.expires_at.getTime(),
+        );
+        expect(refreshedSession.updated_at.getTime()).toBeGreaterThan(
+            sessionObj.updated_at.getTime(),
+        );
+
+        // set-cookie
+        const cookies = setCookieParser.parse(response);
+        expect(cookies).toHaveLength(1);
+        expect(cookies[0].name).toBe("session_id");
+        expect(cookies[0].value).toBe(refreshedSession.token);
+        expect(cookies[0].httpOnly).toBe(true);
+        expect(cookies[0].path).toBe("/");
+        expect(cookies[0].maxAge).toBe(
+            session.EXPIRATION_IN_MILISECONDS / 1000,
+        );
+        expect(cookies[0].sameSite).toBe("Strict");
     });
     test("With non-existent session should return 401", async () => {
         const response = await fetch("http://localhost:3000/api/v1/user", {
