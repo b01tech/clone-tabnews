@@ -21,6 +21,7 @@ async function onErrorHandler(error, request, response) {
         return response.status(error.statusCode).json(error);
     }
     if (error instanceof UnauthorizedError) {
+        await clearSessionCookie(response);
         return response.status(error.statusCode).json(error);
     }
 
