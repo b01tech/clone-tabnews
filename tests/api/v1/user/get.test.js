@@ -11,9 +11,58 @@ beforeAll(async () => {
 describe("GET /api/v1/user", () => {
     test("With valid session should return 200", async () => {
         const createUser = await orchestrator.createUser({
+            username: "UserOldWithValidSession",
+            email: "useroldwithvalidsession@example.com",
+        });
+        const sessionObj = await orchestrator.createSession(createUser.id);
+
+        const response = await fetch("http://localhost:3000/api/v1/user", {
+            headers: {
+                Cookie: `session_id=${sessionObj.token}`,
+            },
+        });
+        const responseBody = await response.json();
+        expect(response.status).toBe(200);
+        expect(responseBody).toEqual({
+            id: createUser.id,
+            username: createUser.username,
+            email: createUser.email,
+            created_at: createUser.created_at.toISOString(),
+            updated_at: createUser.updated_at.toISOString(),
+        });
+
+        // refresh session
+        const refreshedSession = await session.findByValidToken(
+            sessionObj.token,
+        );
+        expect(refreshedSession.expires_at.getTime()).toBeGreaterThan(
+            sessionObj.expires_at.getTime(),
+        );
+        expect(refreshedSession.updated_at.getTime()).toBeGreaterThan(
+            sessionObj.updated_at.getTime(),
+        );
+
+        // set-cookie
+        const cookies = setCookieParser.parse(response);
+        expect(cookies).toHaveLength(1);
+        expect(cookies[0].name).toBe("session_id");
+        expect(cookies[0].value).toBe(refreshedSession.token);
+        expect(cookies[0].httpOnly).toBe(true);
+        expect(cookies[0].path).toBe("/");
+        expect(cookies[0].maxAge).toBe(
+            session.EXPIRATION_IN_MILISECONDS / 1000,
+        );
+        expect(cookies[0].sameSite).toBe("Strict");
+    });
+    test("With a valid old session return 200", async () => {
+        jest.useFakeTimers({
+            now: Date.now() - session.EXPIRATION_IN_MILISECONDS + 1000,
+        });
+        const createUser = await orchestrator.createUser({
             username: "UserWithValidSession",
         });
         const sessionObj = await orchestrator.createSession(createUser.id);
+        jest.useRealTimers();
 
         const response = await fetch("http://localhost:3000/api/v1/user", {
             headers: {
