@@ -42,6 +42,11 @@ describe("GET /api/v1/user", () => {
             sessionObj.updated_at.getTime(),
         );
 
+        // cache-control
+        expect(response.headers.get("Cache-Control")).toBe(
+            "no-store, no-cache, max-age=0, must-revalidate",
+        );
+
         // set-cookie
         const cookies = setCookieParser.parse(response);
         expect(cookies).toHaveLength(1);
@@ -88,6 +93,10 @@ describe("GET /api/v1/user", () => {
         );
         expect(refreshedSession.updated_at.getTime()).toBeGreaterThan(
             sessionObj.updated_at.getTime(),
+        );
+        // cache-control
+        expect(response.headers.get("Cache-Control")).toBe(
+            "no-store, no-cache, max-age=0, must-revalidate",
         );
 
         // set-cookie
