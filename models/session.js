@@ -17,13 +17,20 @@ async function findByValidToken(token) {
     }
     return result.rows[0];
 }
-
 async function create(userId) {
     const token = crypto.randomBytes(48).toString("hex");
     const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILISECONDS);
 
     const newSession = await runInsertQuery(token, userId, expiresAt);
     return newSession;
+}
+async function refresh(sessionId) {
+    const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILISECONDS);
+    const results = await database.query({
+        text: "UPDATE sessions SET expires_at=$1, updated_at=NOW() WHERE id=$2 RETURNING *",
+        values: [expiresAt, sessionId],
+    });
+    return results.rows[0];
 }
 
 async function runInsertQuery(token, userId, expiresAt) {
@@ -37,6 +44,7 @@ async function runInsertQuery(token, userId, expiresAt) {
 const session = {
     findByValidToken,
     create,
+    refresh,
     EXPIRATION_IN_MILISECONDS,
 };
 
