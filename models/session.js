@@ -3,6 +3,14 @@ import database from "infra/database.js";
 
 const EXPIRATION_IN_MILISECONDS = 1000 * 60 * 60 * 24 * 30; // 30 days
 
+async function findByValidToken(token) {
+    const result = await database.query({
+        text: "SELECT * FROM sessions WHERE token=$1 AND expires_at > NOW()",
+        values: [token],
+    });
+    return result.rows[0];
+}
+
 async function create(userId) {
     const token = crypto.randomBytes(48).toString("hex");
     const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILISECONDS);
@@ -20,6 +28,7 @@ async function runInsertQuery(token, userId, expiresAt) {
 }
 
 const session = {
+    findByValidToken,
     create,
     EXPIRATION_IN_MILISECONDS,
 };
