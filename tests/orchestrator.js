@@ -1,11 +1,14 @@
 import retry from "async-retry";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
-import user from "models/user.js";
 import session from "models/session.js";
+import user from "models/user.js";
+
+const emailUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
 async function waitForAllServices() {
     await waitForWebServer();
+    await waitForEmailServer();
 
     async function waitForWebServer() {
         return retry(fetchStatusPage, {
@@ -32,6 +35,34 @@ async function waitForAllServices() {
             }
         }
     }
+    async function waitForEmailServer() {
+        return retry(fetchEmailPage, {
+            retries: 30,
+            maxTimeout: 2000,
+            onRetry: (err, attempt) => {
+                console.log(
+                    `Tentativa ${attempt} falhou, tentando novamente...`,
+                );
+            },
+        });
+
+        async function fetchEmailPage() {
+            try {
+                const response = await fetch(`${emailUrl}`);
+                if (response.status !== 200) {
+                    throw new Error(
+                        `Status ${response.status} ao conectar com servidor de email`,
+                    );
+                }
+            } catch (error) {
+                console.log(
+                    "Erro ao conectar com servidor de email:",
+                    error.message,
+                );
+                throw error;
+            }
+        }
+    }
 }
 
 async function clearDatabase() {
@@ -53,6 +84,22 @@ async function createSession(userId) {
     const newSession = await session.create(userId);
     return newSession;
 }
+async function deleteAllEmails() {
+    await fetch(`${emailUrl}/messages`, {
+        method: "DELETE",
+    });
+}
+async function getLastEmail() {
+    const response = await fetch(`${emailUrl}/messages`);
+    const emailListBody = await response.json();
+    const lastEmail = emailListBody.pop();
+    const lastEmailBodyMessage = await fetch(
+        `${emailUrl}/messages/${lastEmail.id}.plain`,
+    );
+    const lastEmailBodyMessageText = await lastEmailBodyMessage.text();
+    lastEmail.text = lastEmailBodyMessageText;
+    return lastEmail;
+}
 
 const orchestrator = {
     waitForAllServices,
@@ -60,6 +107,8 @@ const orchestrator = {
     runningPendingMigrations,
     createUser,
     createSession,
+    deleteAllEmails,
+    getLastEmail,
 };
 
 export default orchestrator;
